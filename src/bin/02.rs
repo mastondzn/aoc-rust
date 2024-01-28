@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 advent_of_code::solution!(2);
 
 #[derive(Clone, Debug, Copy, PartialEq)]
@@ -21,9 +19,9 @@ impl Outcome {
 
 #[derive(Clone, Debug, Copy, PartialEq)]
 enum Move {
-    Rock = 1,
-    Paper = 2,
-    Scissors = 3,
+    Rock,
+    Paper,
+    Scissors,
 }
 
 impl Move {
@@ -58,51 +56,47 @@ fn calculate_score<'a, 'b>(moves: impl Iterator<Item = (&'a Move, &'b Move)>) ->
     })
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let left_decode_map: HashMap<_, _> =
-        [("A", Move::Rock), ("B", Move::Paper), ("C", Move::Scissors)]
-            .iter()
-            .cloned()
-            .collect();
+fn decode_left<'a>(left: &'a str) -> Option<&'a Move> {
+    match left {
+        "A" => Some(&Move::Rock),
+        "B" => Some(&Move::Paper),
+        "C" => Some(&Move::Scissors),
+        _ => None,
+    }
+}
 
-    let right_decode_map: HashMap<_, _> =
-        [("X", Move::Rock), ("Y", Move::Paper), ("Z", Move::Scissors)]
-            .iter()
-            .cloned()
-            .collect();
+pub fn part_one(input: &str) -> Option<u32> {
+    fn decode_right<'a>(right: &'a str) -> Option<&'a Move> {
+        match right {
+            "X" => Some(&Move::Rock),
+            "Y" => Some(&Move::Paper),
+            "Z" => Some(&Move::Scissors),
+            _ => None,
+        }
+    }
 
     let moves = input.lines().map(|line| {
         let (left, right) = line.split_once(" ").unwrap();
-
-        (
-            left_decode_map.get(left).unwrap(),
-            right_decode_map.get(right).unwrap(),
-        )
+        (decode_left(left).unwrap(), decode_right(right).unwrap())
     });
 
     Some(calculate_score(moves))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let left_decode_map: HashMap<_, _> =
-        [("A", Move::Rock), ("B", Move::Paper), ("C", Move::Scissors)]
-            .iter()
-            .cloned()
-            .collect();
-
-    let right_decode_map: HashMap<_, _> = [
-        ("X", Outcome::Lose),
-        ("Y", Outcome::Draw),
-        ("Z", Outcome::Win),
-    ]
-    .iter()
-    .cloned()
-    .collect();
+    fn decode_right<'a>(right: &'a str) -> Option<&'a Outcome> {
+        match right {
+            "X" => Some(&Outcome::Lose),
+            "Y" => Some(&Outcome::Draw),
+            "Z" => Some(&Outcome::Win),
+            _ => None,
+        }
+    }
 
     let moves = input.lines().map(|line| {
         let (left, right) = line.split_once(" ").unwrap();
-        let left_move = left_decode_map.get(left).unwrap();
-        let desired_outcome = right_decode_map.get(right).unwrap();
+        let left_move = decode_left(left).unwrap();
+        let desired_outcome = decode_right(right).unwrap();
 
         let right_move = Move::VALUES
             .iter()
